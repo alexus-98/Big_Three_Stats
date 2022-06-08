@@ -5,10 +5,10 @@ navbar:
   left:
   - text: "Home"
     href: index.html
-  - text: "Performance"
-    href: performance.html
   - text: "Ranking"
     href: ranking.html
+  - text: "Performance"
+    href: performance.html
   - text: "Time on Court"
     href: time.html
   - text: "Aces"
