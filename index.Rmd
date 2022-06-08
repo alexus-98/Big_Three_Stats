@@ -3,7 +3,7 @@
 
 ### Big Three stats comparison
 
-Throughout the years many comparison between 3 most successful tennis male players of Open Era has been made. On the next pages you will see various statistics that show differences in performance for Federer, Nadal and Djokocovic in different aspects of the game. The dataset was downloaded from [Kaggle](https://www.kaggle.com/datasets/sijovm/atpdata), and contains detailed match statistics from 1991, up to February 2019.
+Throughout the years many comparisons between three most successful tennis male players of Open Era has been made. On the next pages you will see various statistics that show differences in performance for Federer, Nadal and Djokocovic in different aspects of the game. The dataset was downloaded from [Kaggle](https://www.kaggle.com/datasets/sijovm/atpdata), and contains detailed match statistics from 1991, up to February 2019.
 
 However, for the comparison of the Big Three players only data from the beginning of the 2000 until the end of 2018 will be considered.
 
