@@ -1,0 +1,133 @@
+
+### Performance on different surfaces
+
+On the first plot a comparison between Big Three players on different surfaces is presented. It helps us understand how effective each of the players is in terms of winning matches. Values are given both in absolute and percentage terms.
+All of the players have outstanding win to loose ratios, but some visible differences are present. Djokovic has been the most consistent among the Big Three across three main surfaces, having at least 80% of wins at each. Federer however has the best results on grass courts (88% of wins), while Nadal is the undisputed king of clay (92% of wins).
+
+&nbsp;
+
+
+```{r, echo = FALSE, message = FALSE}
+atp <- read.csv("C:/Users/lenovo/Desktop/WNE/Advanced Visualisation R/Project/ATP.csv")
+
+library(ggplot2)
+library(dplyr)
+library(ggthemes)
+library(gridExtra)
+library(grid)
+
+
+atp <- transform(atp, tourney_date = as.Date(as.character(tourney_date), "%Y%m%d"))
+
+atp_XXI <- atp[atp$tourney_date >= "2000-01-01",]
+
+# Djokovic index = 104925
+# Nadal index = 104745
+# Federer index = 103819
+
+# Filtering for Djokovic, Nadal and Federer matches only
+DNF_matches <- atp_XXI %>%
+  filter(loser_id %in% c(104925, 104745, 103819) | winner_id %in% c(104925, 104745, 103819))
+
+### Roger Federer matches won on each surface ###
+
+RF <- DNF_matches %>%
+  filter((loser_id == 103819 | winner_id == 103819) & surface %in% c("Clay", "Grass", "Hard"))
+
+RF <- RF %>%
+  select(winner_name, winner_rank, loser_name, loser_rank, surface)
+
+RF$is_winner <- ifelse(RF$winner_name == 'Roger Federer', T, F)
+
+RF_stats <- as.data.frame(table(RF$is_winner, RF$surface))
+names(RF_stats) <- c("Won", "Surface", "Freq")
+
+RF_stats <- RF_stats %>%
+  group_by(Surface) %>%
+  mutate(Percent = paste0(round(Freq*100 / sum(Freq)), "%"))
+
+
+RF_plot <- 
+  ggplot(RF_stats, aes(x = Surface, y = Freq, fill = Won)) +
+    geom_bar(stat = 'identity', color = 'black', show.legend = F) +
+    geom_text(aes(label = Percent), position = position_stack(vjust = 0.5), size = 3.5) +
+    scale_fill_manual(values = c("#de7662", "#86cf70")) +
+    scale_y_continuous(breaks = seq(0, 1000, by = 100),
+                       limits = c(0, 900)) +
+    labs(x = "", y = "", title = "Roger Federer") +
+    theme_gray() +
+    theme(plot.title = element_text(hjust = 0.5))
+    
+
+
+
+### Novak Djokovic matches won on each surface ###
+
+ND <- DNF_matches %>%
+  filter((loser_id == 104925 | winner_id == 104925) & surface %in% c("Clay", "Grass", "Hard"))
+
+ND <- ND %>%
+  select(winner_name, surface)
+
+ND$is_winner <- ifelse(ND$winner_name == 'Novak Djokovic', T, F)
+
+ND_stats <- as.data.frame(table(ND$is_winner, ND$surface))
+names(ND_stats) <- c("Won", "Surface", "Freq")
+
+ND_stats <- ND_stats %>%
+  group_by(Surface) %>%
+  mutate(Percent = paste0(round(Freq*100 / sum(Freq)), "%"))
+
+
+ND_plot <- 
+  ggplot(ND_stats, aes(x = Surface, y = Freq, fill = Won)) +
+  geom_bar(stat = 'identity', color = 'black', show.legend = F) +
+  geom_text(aes(label = Percent), position = position_stack(vjust = 0.5), size = 3.5) +
+  scale_fill_manual(values = c("#de7662", "#86cf70")) +
+  scale_y_continuous(breaks = seq(0, 1000, by = 100),
+                     limits = c(0, 900)) +
+  labs(x = "", y = "", title = "Novak Djokovic") +
+  theme_gray() +
+  theme(plot.title = element_text(hjust = 0.5))
+
+
+### Rafael Nadal matches won on each surface ###
+
+RN <- DNF_matches %>%
+  filter((loser_id == 104745 | winner_id == 104745) & surface %in% c("Clay", "Grass", "Hard"))
+
+RN <- RN %>%
+  select(winner_name, surface)
+
+RN$is_winner <- ifelse(RN$winner_name == 'Rafael Nadal', T, F)
+
+RN_stats <- as.data.frame(table(RN$is_winner, RN$surface))
+names(RN_stats) <- c("Won", "Surface", "Freq")
+
+RN_stats <- RN_stats %>%
+  group_by(Surface) %>%
+  mutate(Percent = paste0(round(Freq*100 / sum(Freq)), "%"))
+
+
+RN_plot <- 
+  ggplot(RN_stats, aes(x = Surface, y = Freq, fill = Won)) +
+  geom_bar(stat = 'identity', color = 'black', show.legend = F) +
+  geom_text(aes(label = Percent), position = position_stack(vjust = 0.5), size = 3.5) +
+  scale_fill_manual(values = c("#de7662", "#86cf70")) +
+  scale_y_continuous(breaks = seq(0, 1000, by = 100),
+                     limits = c(0, 900)) +
+  labs(y = "", x = "", title = "Rafael Nadal") +
+  theme_gray() +
+  theme(plot.title = element_text(hjust = 0.5))
+
+grid.arrange(RF_plot, ND_plot, RN_plot, ncol = 3, 
+             top = textGrob("Big Three performance on different surfaces in years 2000 - 2018",
+             gp = gpar(fontsize = 16, vjust = 2, col = "#3335a1", face = "bold")),
+             left = "Number of matches played (wins in green)", bottom = textGrob("Surface",
+             gp = gpar(fontsize = 12)))
+```
+
+
+
+
+

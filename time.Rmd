@@ -1,0 +1,74 @@
+
+### Average time spent on GS courts
+
+Time spent on court indicates how much effort player has to put to win his matches. One key insight from this graph is that Federer tends to spend much less time in the first rounds of Grand Slams than Djokovic and Nadal.
+This might be the key to his long-lasting career, as he is currently 41 and still promised to compete in several events later this year. Both Nadal and Djokovic are a couple years younger, therefore only in subsequent years we will be able to tell if Federer lasted longer as a professional player. 
+
+&nbsp;
+
+
+```{r, warning = FALSE, echo = FALSE, message = FALSE}
+atp <- read.csv("C:/Users/lenovo/Desktop/WNE/Advanced Visualisation R/Project/ATP.csv")
+
+library(ggplot2)
+library(dplyr)
+library(ggthemes)
+
+atp <- transform(atp, tourney_date = as.Date(as.character(tourney_date), "%Y%m%d"))
+
+atp_XXI <- atp[atp$tourney_date >= "2000-01-01",]
+
+# Djokovic index = 104925
+# Nadal index = 104745
+# Federer index = 103819
+
+# Filtering for Djokovic, Nadal and Federer matches only
+DNF_matches <- atp_XXI %>%
+  filter(loser_id %in% c(104925, 104745, 103819) | winner_id %in% c(104925, 104745, 103819))
+
+DNF_matches_GS <- DNF_matches %>%
+  filter(tourney_level == "G" & winner_id %in% c(104925, 104745, 103819)) %>%
+  select(winner_name, loser_name, tourney_name, minutes, round)
+
+# Data preprocessing
+DNF_matches_GS$tourney_name <- gsub("Us Open", "US Open", DNF_matches_GS$tourney_name)
+
+DNF_matches_GS$round <- factor(DNF_matches_GS$round, ordered = T,
+                               levels = c("R128", "R64", "R32",
+                                          "R16", "QF", "SF", "F"))
+
+# Grouping
+DNF_GS_time <- DNF_matches_GS %>%
+  group_by(round, winner_name, tourney_name) %>%
+  dplyr::summarize(avg_time = mean(minutes, na.rm = T))
+
+
+timeHM_formatter <- function(x) {
+  lab <- sprintf("%.01d:%.02d", x %/% 60, round(x %% 60))
+  return(lab)
+}
+
+ggplot(DNF_GS_time, aes(y = avg_time, x = round)) +
+  geom_point(aes(color = winner_name)) +
+  geom_line(aes(color = winner_name, group = winner_name)) +
+  facet_wrap(.~tourney_name, nrow = 2) +
+  scale_color_manual(values=c("#307df0", "#d6c31a", "#cc0e18"))+
+  scale_y_continuous(breaks = seq(90, 300, 30),
+                     labels = timeHM_formatter) +
+  labs(y = "Average match time (in hours)", x = "Stage of the tournament",
+       title = "Time spent on court by Big Three in Grand Slams", 
+       caption = "Average time was computed for won matches only",
+       color = "Name of the player") +
+  theme_minimal() +
+  theme(plot.title = element_text(size = 16, face = "bold", hjust = 0.5,
+                                  color = "#3335a1", margin = margin(b = 10)),
+        plot.subtitle = element_text(size = 12, face = "bold"),
+        panel.grid.major.x = element_blank(),
+        strip.text.y = element_text(face = "bold", lineheight = 0.1),
+        strip.text.x = element_text(face = "bold"),
+        axis.text.x = element_text(margin = margin(b = 10)),
+        axis.text.y = element_text(margin = margin(l = 10)),
+        axis.title = element_text(size = 13),
+        plot.caption = element_text(face = "italic")
+        ) 
+```

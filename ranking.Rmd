@@ -1,0 +1,78 @@
+
+### Ranking at the end of calendar year
+
+One of the most important measures of greatness in my opinion is how consistent each of them was year by year. This graph is a perfect example of how remarkably well Djokovic, Nadal and Federer managed to mantain their form from the very first season they ended up in the top of the ATP Rankings. 
+
+&nbsp;
+
+
+```{r, echo = FALSE, warning = FALSE, message = FALSE}
+library(dplyr)
+library(ggplot2)
+devtools::install_github("rensa/ggflags")
+library(ggflags)
+
+### Loading datasets ###
+
+atp_00s <- read.csv("C:/Users/lenovo/Desktop/WNE/Advanced Visualisation R/Project/atp_rankings_00s.csv")
+atp_10s <- read.csv("C:/Users/lenovo/Desktop/WNE/Advanced Visualisation R/Project/atp_rankings_10s.csv")
+
+atp_2000s <- rbind(atp_00s, atp_10s)
+
+atp_2000s <- atp_2000s %>% 
+  select(ranking_date, rank, player)
+
+
+# Transforming date to appropriate format
+atp_2000s <- transform(atp_2000s, ranking_date = as.Date(as.character(ranking_date), "%Y%m%d"))
+
+# Djokovic index = 104925
+# Nadal index = 104745
+# Federer index = 103819
+
+# Filtering the dataset for Djokovic, Federer and Nadal 
+Big_Three <- atp_2000s %>%
+  filter(player %in% c(104925, 104745, 103819))
+
+Big_Three$player_name <- ifelse(Big_Three$player == 104925, "Djokovic",
+                                ifelse(Big_Three$player == 104745, "Nadal", "Federer"))
+
+Big_Three$yr = format(Big_Three$ranking_date, "%Y")
+
+Big_Three <- Big_Three %>%
+  group_by(yr) %>%
+  filter(ranking_date == max(ranking_date))
+
+Big_Three <- Big_Three %>%
+  select(player_name, rank, yr) %>%
+  filter(rank <= 10)
+
+country = c("ch")
+
+d <- data.frame(x=rnorm(50), y=rnorm(50), 
+                country=sample(c("ar","fr", "nz", "gb", "es", "ca", "lv", "qa"), 50, TRUE), 
+                stringsAsFactors = FALSE)
+
+
+Big_Three$country <- ifelse(Big_Three$player_name == "Djokovic", "rs",
+                ifelse(Big_Three$player_name == "Nadal", "es", "ch"))
+
+ggplot(Big_Three, aes(x = yr, y = rank, group = factor(player_name),
+                      color = factor(player_name), country = country))+
+  geom_point(size = 2.5) +
+  geom_line(aes(linetype = factor(player_name)), size = 1, show.legend = F) +
+  labs(x = "Year", y = "Ranking", title = "Ranking of the Big Three players at the end of calendar year",
+       fill = "Player name") +
+  geom_flag() +
+  scale_y_reverse(breaks = seq(0, 10, by = 1)) +
+  scale_color_manual(values=c("#307df0", "#cc0e18", "#dbde28"),
+        name = "Name of the player", labels = c("Novak Djokovic", "Roger Federer", "Rafael Nadal")) +
+  theme_classic() +
+  theme(plot.title = element_text(size = 16, face = "bold", hjust = 0.5,
+                                  color = "#464a46", margin = margin(b = 10)),
+        axis.text.x = element_text(margin = margin(b = 10)),
+        axis.text.y = element_text(margin = margin(l = 10)),
+        axis.title = element_text(size = 13)
+  ) 
+```
+

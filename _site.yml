@@ -1,12 +1,21 @@
-name: "cars"
+name: "Big Three comparison"
 output_dir: "docs"
 navbar:
-  title: "Cars"
+  title: "Big Three comparison"
   left:
   - text: "Home"
     href: index.html
-  - text: "Speed and Distance"
-    href: stats.html
+  - text: "Performance"
+    href: performance.html
+  - text: "Ranking"
+    href: ranking.html
+  - text: "Time on Court"
+    href: time.html
+  - text: "Aces"
+    href: aces.html
+
 output:
   html_document:
+    fig_width: 12 
+    fig_height: 8
     theme: cosmo

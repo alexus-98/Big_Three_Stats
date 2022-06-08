@@ -1,0 +1,77 @@
+
+### Distribution of Aces
+
+On of the key elements of tennis game that is easily to assess from statistical point of view are aces served. While they solely do not define a success or failure, they can hint what kind of style each of the players has. Federer serving many aces on each surface is one of the factors why he tends to spent less time on court. Nadal, on the other hand, rarely serves many aces, and therefore he has to fight to win the points in the rallies. 
+
+The upper part of the graph presents the distribution of aces for tournaments where best-of-three sets matches are played (ATP tournaments). The lower part shows the distribution in best-of-five matches (Grand Slams and in the past ATP 1000 tournaments).
+
+&nbsp;
+
+
+
+```{r, echo = FALSE, warning = FALSE, message = FALSE}
+atp <- read.csv("C:/Users/lenovo/Desktop/WNE/Advanced Visualisation R/Project/ATP.csv")
+
+library(ggplot2)
+library(dplyr)
+library(ggthemes)
+
+### DATA PREPROCESSING ### 
+
+atp <- transform(atp, tourney_date = as.Date(as.character(tourney_date), "%Y%m%d"))
+
+atp_XXI <- atp[atp$tourney_date >= "1998-01-01",]
+
+# Djokovic index = 104925
+# Nadal index = 104745
+# Federer index = 103819
+
+# Filtering for Djokovic, Nadal and Federer matches only
+DNF_matches <- atp_XXI %>%
+  filter(loser_id %in% c(104925, 104745, 103819) | winner_id %in% c(104925, 104745, 103819))
+
+DNF_matches <- DNF_matches %>%
+  select(winner_name, w_ace, loser_name, l_ace, best_of) %>%
+  filter(!is.na(w_ace)) 
+
+DNF_aces_won <- DNF_matches %>%
+  filter(winner_name %in% c("Roger Federer", "Rafael Nadal", "Novak Djokovic")) %>%
+  select("Aces" = w_ace, "Player_name" = winner_name, best_of)
+
+DNF_aces_lost <- DNF_matches %>%
+  filter(loser_name %in% c("Roger Federer", "Rafael Nadal", "Novak Djokovic")) %>%
+  select("Aces" = l_ace, "Player_name" = loser_name, best_of)
+
+DNF_aces <- rbind(DNF_aces_won, DNF_aces_lost)
+
+DNF_aces$best_of <- as.factor(DNF_aces$best_of)
+levels(DNF_aces$best_of) <- c("Best-of-three sets matches", "Best-of-five sets matches")
+
+devtools::install_github("zeehio/facetscales")
+library(facetscales)
+
+# Customizing y scales
+scales_y <- list(
+  `Best-of-three sets matches` = scale_y_continuous(limits = c(0, 200),
+                                                    breaks = seq(0, 200, 25)),
+  `Best-of-five sets matches` = scale_y_continuous(limits = c(0, 50),
+                                                   breaks = seq(0, 50, 10))
+)
+
+ggplot(DNF_aces, aes(x = Aces)) +
+  geom_histogram(aes(fill = Player_name), colour = "black", binwidth = 1,
+                 show.legend = F) +
+  scale_x_continuous(limits = c(0,25)) +
+  scale_fill_manual(values=c("#307df0", "#dbde28", "#cc0e18")) +
+  facet_grid_sc(best_of ~ Player_name, scales = list(y = scales_y)) +
+  labs(title = "Distribution of aces served by the Big Three players in years 2000 - 2018",
+       x = "Number of aces", y = "Frequency") +
+  theme(plot.title = element_text(size = 16, face = "bold", hjust = 0.5,
+                                  color = "#464a46", margin = margin(b = 10)),
+        strip.text.y = element_text(face = "bold"),
+        strip.text.x = element_text(face = "bold"),
+        axis.text.x = element_text(margin = margin(b = 10)),
+        axis.text.y = element_text(margin = margin(l = 10)),
+        axis.title = element_text(size = 13)) 
+```
+
